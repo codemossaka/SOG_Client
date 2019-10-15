@@ -8,14 +8,14 @@
 <a name="1"/>
 
 # 1. Подключение к серверу 
-![Подключение к серверу ](../../../Image/System%20design/connect_seq.png)
+![Подключение к серверу ](../../../Images/System%20design/connect_seq.png)
 
 <a name="2"/>
 
 # 2. Отключение от сервера
-![Отключение от сервера](../../../Image/System%20design/disconnect_seq.png)
+![Отключение от сервера](../../../Images/System%20design/disconnect_seq.png)
 
 <a name="3"/>
 
 # 3. Смена режима отображения
-![Смена режима отображения](../../../Image/System%20design/change_show_mode_seq.png)
+![Смена режима отображения](../../../Images/System%20design/change_show_mode_seq.png)
