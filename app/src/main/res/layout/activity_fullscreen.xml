@@ -70,7 +70,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.18"
+                app:layout_constraintVertical_bias="0.389"
                 tools:targetApi="o" />
 
             <Button
@@ -97,6 +97,7 @@
                 android:layout_marginBottom="16dp"
                 android:background="@color/elements"
                 android:entries="@array/type_of_information"
+                android:popupBackground="@color/dark_orange"
                 android:spinnerMode="dropdown"
                 app:layout_constraintBottom_toTopOf="@+id/editText4"
                 app:layout_constraintEnd_toEndOf="parent"

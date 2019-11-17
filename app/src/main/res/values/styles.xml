@@ -6,11 +6,15 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
     </style>
 
     <style name="FullscreenTheme" parent="AppTheme">
         <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
         <item name="android:windowActionBarOverlay">true</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@null</item>
         <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
         <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
@@ -26,6 +30,8 @@
     <style name="Spinner" parent="Widget.AppCompat.Spinner">
         <item name="android:colorBackground">@color/elements</item>
         <item name="android:background">@drawable/edit_text</item>
+        <item name="android:colorBackgroundCacheHint">@color/dark_orange</item>
+        <item name="android:panelColorBackground">@color/dark_orange</item>
     </style>
 
 </resources>

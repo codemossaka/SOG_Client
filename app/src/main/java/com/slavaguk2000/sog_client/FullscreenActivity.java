@@ -2,22 +2,23 @@ package com.slavaguk2000.sog_client;
 
 import android.annotation.SuppressLint;
 
-import androidx.appcompat.app.ActionBar;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatEditText;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.icu.lang.UCharacterEnums;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,36 +26,62 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
+
+import static android.text.InputType.TYPE_CLASS_NUMBER;
+import static android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL;
 
 public class FullscreenActivity extends AppCompatActivity {
     private static final int UI_ANIMATION_DELAY = 100;
     private final Handler mHideHandler = new Handler();
     private View mContentView;
+/*
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
         public void run() {
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            mContentView.setSystemUiVisibility(//View.SYSTEM_UI_FLAG_LOW_PROFILE
+                    //|
+                    View.SYSTEM_UI_FLAG_FULLSCREEN//!!
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE//!!
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+                   // | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    );
         }
     };
+    View.OnClickListener getClickListener()
+    {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hide();
+                InputMethodManager inputManager = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(v.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        };
+    }
+*/
+
+    private void hideKeyboard(View view) {
+        //if(view.getClass() == AppCompatEditText.class) return;
+        InputMethodManager inputManager = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (inputManager != null) {
+            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
         mContentView = findViewById(R.id.fullscreen_content);
-        hide();
-        setListners();
+        //hide();
+        setupControlElements();
+        //mContentView.setOnClickListener(getClickListener());
     }
 
-    private void setSpinnersListners() {
-        ((Spinner) findViewById(R.id.spinner)).setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    private AdapterView.OnItemSelectedListener getOnItemSelectedListener() {
+        return new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
@@ -64,15 +91,32 @@ public class FullscreenActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
-        });
+        };
+    }
+
+    private AdapterView.OnTouchListener getOnTouchListener() {
+        return new AdapterView.OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                hideKeyboard(v);
+                return false;
+            }
+        };
+    }
+
+    private void setupSpinner() {
+        Spinner modeSpinner = findViewById(R.id.spinner);
+        modeSpinner.setOnItemSelectedListener(getOnItemSelectedListener());
+        modeSpinner.setOnTouchListener(getOnTouchListener());
     }
 
     String previousAddress;
     int previousPosition;
+    String holdAddress;
 
-    private void setEditTextListners() {
-        final EditText ipAddressField = findViewById(R.id.editText4);
-        ipAddressField.addTextChangedListener(new TextWatcher() {
+    private TextWatcher getIpAddressTextWatcher(final EditText ipAddressField) {
+        return new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 previousAddress = ipAddressField.getText().toString();
@@ -88,15 +132,48 @@ public class FullscreenActivity extends AppCompatActivity {
                 if (!inChanged)
                     editIpAddressField(ipAddressField);
             }
-        });
+        };
     }
 
-    private void setListners() {
-        setSpinnersListners();
-        setEditTextListners();
+
+    private View.OnKeyListener getEditTextClearOnKeyListener() {
+        return new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                EditText ipAddressField = (EditText) v;
+                if (event.getAction() == KeyEvent.ACTION_DOWN)
+                    holdAddress = ipAddressField.getText().toString();
+                if (event.getAction() == KeyEvent.ACTION_UP)
+                    if (holdAddress.length() - ipAddressField.getText().toString().length() > 1)
+                        ipAddressField.setText("");
+                return false;
+            }
+        };
     }
 
-    private void setTextWithSaveCoursor(EditText ipAddressField, String ipAddress, int offset) {
+    private void setupIpAddressEditText() {
+        final EditText ipAddressField = findViewById(R.id.editText4);
+        ipAddressField.setInputType(TYPE_NUMBER_FLAG_DECIMAL | TYPE_CLASS_NUMBER);
+        ipAddressField.addTextChangedListener(getIpAddressTextWatcher(ipAddressField));
+        ipAddressField.setOnKeyListener(getEditTextClearOnKeyListener());
+    }
+
+    private View.OnClickListener getHideKeyboardClickListener() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideKeyboard(v);
+            }
+        };
+    }
+
+    private void setupControlElements() {
+        setupSpinner();
+        setupIpAddressEditText();
+        findViewById(R.id.fullscreen_content).setOnClickListener(getHideKeyboardClickListener());
+    }
+
+    private void setTextWithSaveCursor(EditText ipAddressField, String ipAddress, int offset) {
         inChanged = true;
         int position = ipAddressField.getSelectionStart();
         ipAddressField.setText(ipAddress);
@@ -109,53 +186,56 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private void smartClearAddress(EditText ipAddressField, String ipAddress) {
         if (previousAddress.endsWith(".") && ipAddress.length() > 0)
-            setTextWithSaveCoursor(ipAddressField, ipAddress.substring(0, ipAddress.length() - 1), -1);
+            setTextWithSaveCursor(ipAddressField, ipAddress.substring(0, ipAddress.length() - 1), -1);
     }
 
     private void smartWriteAddress(EditText ipAddressField, String ipAddress) {
         String[] domains = ipAddress.split("\\.");
         int dl = domains.length;
         if (dl > 0 && dl < 4 && domains[dl - 1].length() == 3 && !ipAddress.endsWith(".")) {
-            setTextWithSaveCoursor(ipAddressField, ipAddress + ".", 1);
+            setTextWithSaveCursor(ipAddressField, ipAddress + ".", 1);
         }
+    }
+    public boolean checkMatchingIpStructure(String ipAddress)
+    {
+        return ipAddress.matches("(\\d{1,3}\\.){0,3}\\d{0,3}");
     }
 
     private void editIpAddressField(EditText ipAddressField) {
         try {
             String ipAddress = ipAddressField.getText().toString();
-            if (!ipAddress.matches("\\d{1,3}(\\.\\d{0,3}){0,3}") && !ipAddress.isEmpty()) {
+            if (checkMatchingIpStructure(ipAddress)) {
+                if (ipAddress.length() < previousAddress.length())
+                    smartClearAddress(ipAddressField, ipAddress);
+                else smartWriteAddress(ipAddressField, ipAddress);
+            } else {
                 inChanged = true;
                 ipAddressField.setText(previousAddress);
                 ipAddressField.setSelection(previousPosition - 1);
                 inChanged = false;
-                return;
             }
-            if (ipAddress.length() < previousAddress.length())
-                smartClearAddress(ipAddressField, ipAddress);
-            else smartWriteAddress(ipAddressField, ipAddress);
+        } catch (Exception ignored) {
         }
-        catch(Exception ex){}
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        hide();
+        //hide();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        hide();
+        //hide();
     }
 
-    private void hide() {
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-    }
+//    private void hide() {
+//        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+//    }
 
     public void onClick(View v) {
-        hide();
     }
 
     private void setLocalIp() {
