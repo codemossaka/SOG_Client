@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">SOG-Client</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="backgrounddesccription">backgroundDesccription</string>
+    <string name="connectButton">Connect</string>
+    <string name="ipAddressTextPlain">Name</string>
+    <string name="ip_address"> IP-Address</string>
+    <string-array name="type_of_information">
+        <item>Chords</item>
+        <item>Text</item>
+    </string-array>
+</resources>
