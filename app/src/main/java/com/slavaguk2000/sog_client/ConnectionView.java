@@ -1,24 +1,18 @@
 package com.slavaguk2000.sog_client;
-
 import android.annotation.SuppressLint;
-
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatEditText;
-
 import android.content.Context;
 import android.content.res.Configuration;
-import android.icu.lang.UCharacterEnums;
+import android.net.InetAddresses;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
+import android.text.method.DigitsKeyListener;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,44 +20,19 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 import static android.text.InputType.TYPE_CLASS_NUMBER;
-import static android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL;
 
-public class FullscreenActivity extends AppCompatActivity {
-    private static final int UI_ANIMATION_DELAY = 100;
-    private final Handler mHideHandler = new Handler();
-    private View mContentView;
-/*
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            mContentView.setSystemUiVisibility(//View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    //|
-                    View.SYSTEM_UI_FLAG_FULLSCREEN//!!
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE//!!
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                   // | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    );
-        }
-    };
-    View.OnClickListener getClickListener()
-    {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hide();
-                InputMethodManager inputManager = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputManager.hideSoftInputFromWindow(v.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
-            }
-        };
-    }
-*/
-
+public class ConnectionView extends AppCompatActivity {
+    private static final int HOLD_TIME = 50;
     private void hideKeyboard(View view) {
-        //if(view.getClass() == AppCompatEditText.class) return;
         InputMethodManager inputManager = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (inputManager != null) {
             inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
@@ -74,10 +43,8 @@ public class FullscreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
-        mContentView = findViewById(R.id.fullscreen_content);
-        //hide();
         setupControlElements();
-        //mContentView.setOnClickListener(getClickListener());
+        setLocalIp();
     }
 
     private AdapterView.OnItemSelectedListener getOnItemSelectedListener() {
@@ -113,7 +80,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
     String previousAddress;
     int previousPosition;
-    String holdAddress;
+    long holdStartTime;
 
     private TextWatcher getIpAddressTextWatcher(final EditText ipAddressField) {
         return new TextWatcher() {
@@ -135,17 +102,25 @@ public class FullscreenActivity extends AppCompatActivity {
         };
     }
 
+    boolean pressed = false;
 
     private View.OnKeyListener getEditTextClearOnKeyListener() {
         return new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 EditText ipAddressField = (EditText) v;
-                if (event.getAction() == KeyEvent.ACTION_DOWN)
-                    holdAddress = ipAddressField.getText().toString();
-                if (event.getAction() == KeyEvent.ACTION_UP)
-                    if (holdAddress.length() - ipAddressField.getText().toString().length() > 1)
-                        ipAddressField.setText("");
+                if(inChanged) return true;
+                if (keyCode == KeyEvent.KEYCODE_DEL) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN && !pressed) {
+                        pressed = true;
+                        holdStartTime = System.currentTimeMillis();
+                    }
+                    if (event.getAction() == KeyEvent.ACTION_UP) {
+                        pressed = false;
+                        if (System.currentTimeMillis() - holdStartTime > HOLD_TIME)
+                            ipAddressField.setText("");
+                    }
+                }
                 return false;
             }
         };
@@ -153,7 +128,8 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private void setupIpAddressEditText() {
         final EditText ipAddressField = findViewById(R.id.editText4);
-        ipAddressField.setInputType(TYPE_NUMBER_FLAG_DECIMAL | TYPE_CLASS_NUMBER);
+        ipAddressField.setInputType(TYPE_CLASS_NUMBER);
+        ipAddressField.setKeyListener(DigitsKeyListener.getInstance("0123456789."));
         ipAddressField.addTextChangedListener(getIpAddressTextWatcher(ipAddressField));
         ipAddressField.setOnKeyListener(getEditTextClearOnKeyListener());
     }
@@ -183,10 +159,14 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     boolean inChanged = false;
-
+    int clearOffset = 0;
     private void smartClearAddress(EditText ipAddressField, String ipAddress) {
         if (previousAddress.endsWith(".") && ipAddress.length() > 0)
+        {
             setTextWithSaveCursor(ipAddressField, ipAddress.substring(0, ipAddress.length() - 1), -1);
+            clearOffset = 1;
+        }
+        else clearOffset = 0;
     }
 
     private void smartWriteAddress(EditText ipAddressField, String ipAddress) {
@@ -196,8 +176,8 @@ public class FullscreenActivity extends AppCompatActivity {
             setTextWithSaveCursor(ipAddressField, ipAddress + ".", 1);
         }
     }
-    public boolean checkMatchingIpStructure(String ipAddress)
-    {
+
+    private boolean checkMatchingIpStructure(String ipAddress) {
         return ipAddress.matches("(\\d{1,3}\\.){0,3}\\d{0,3}");
     }
 
@@ -211,8 +191,8 @@ public class FullscreenActivity extends AppCompatActivity {
             } else {
                 inChanged = true;
                 ipAddressField.setText(previousAddress);
-                ipAddressField.setSelection(previousPosition - 1);
                 inChanged = false;
+                ipAddressField.setSelection(previousPosition - 1);
             }
         } catch (Exception ignored) {
         }
@@ -222,40 +202,49 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //hide();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        //hide();
     }
-
-//    private void hide() {
-//        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-//    }
 
     public void onClick(View v) {
     }
 
+    private String getLocalIp(){
+        try{
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                if (intf.getName().contains("wlan")) {
+                    for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
+                            .hasMoreElements();) {
+                        InetAddress inetAddress = enumIpAddr.nextElement();
+                        if (!inetAddress.isLoopbackAddress()
+                                && (inetAddress.getAddress().length == 4)) {
+                            return inetAddress.getHostAddress();
+                        }
+                    }
+                }
+            }
+        }catch(SocketException ignored){}
+        return null;
+    }
+
     private void setLocalIp() {
-        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> getLocalIp = new AsyncTask<Void, Void, Void>() {
+        @SuppressLint("StaticFieldLeak") final AsyncTask<Void, Void, Void> getLocalIp = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                WifiInfo connectionInfo = null;
-                if (wm != null) {
-                    connectionInfo = wm.getConnectionInfo();
-                }
-                int ipAddress = 0;
-                if (connectionInfo != null) {
-                    ipAddress = connectionInfo.getIpAddress();
-                }
-                final String finalMyIp = Formatter.formatIpAddress(ipAddress);
+                final String finalMyIp = getLocalIp();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ((EditText) findViewById(R.id.editText4)).setText(finalMyIp);
+                        if (finalMyIp == null) Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_connection),Toast.LENGTH_LONG).show();
+                        else {
+                            EditText ipEditText = findViewById(R.id.editText4);
+                            ipEditText.setText(finalMyIp.substring(0, finalMyIp.lastIndexOf(".") + 1));
+                            ipEditText.setSelection(ipEditText.getText().toString().length());
+                        }
                     }
                 });
                 return null;

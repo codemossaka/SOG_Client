@@ -6,6 +6,7 @@
     <string name="connectButton">Connect</string>
     <string name="ipAddressTextPlain">Name</string>
     <string name="ip_address"> IP-Address</string>
+    <string name="error_connection">Check connection</string>
     <string-array name="type_of_information">
         <item>Chords</item>
         <item>Text</item>
