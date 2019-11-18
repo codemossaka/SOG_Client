@@ -27,6 +27,7 @@
     <style name="EditText" parent="Widget.AppCompat.EditText">
         <item name="android:background">@drawable/edit_text</item>
     </style>
+
     <style name="Spinner" parent="Widget.AppCompat.Spinner">
         <item name="android:colorBackground">@color/elements</item>
         <item name="android:background">@drawable/edit_text</item>

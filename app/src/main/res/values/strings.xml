@@ -7,8 +7,12 @@
     <string name="ipAddressTextPlain">Name</string>
     <string name="ip_address"> IP-Address</string>
     <string name="error_connection">Check connection</string>
+    <string name="text">1. In the beginning God created the heavens and the earth.</string>
+    <string name="title">Genesis 1</string>
     <string-array name="type_of_information">
         <item>Chords</item>
         <item>Text</item>
     </string-array>
+
+    <string name="title_activity_demonstration_view">DemonstrationView</string>
 </resources>

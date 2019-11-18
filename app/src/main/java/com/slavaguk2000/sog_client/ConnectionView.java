@@ -1,7 +1,11 @@
 package com.slavaguk2000.sog_client;
+
 import android.annotation.SuppressLint;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.InetAddresses;
 import android.net.wifi.WifiInfo;
@@ -32,6 +36,7 @@ import static android.text.InputType.TYPE_CLASS_NUMBER;
 
 public class ConnectionView extends AppCompatActivity {
     private static final int HOLD_TIME = 50;
+
     private void hideKeyboard(View view) {
         InputMethodManager inputManager = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (inputManager != null) {
@@ -109,7 +114,7 @@ public class ConnectionView extends AppCompatActivity {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 EditText ipAddressField = (EditText) v;
-                if(inChanged) return true;
+                if (inChanged) return true;
                 if (keyCode == KeyEvent.KEYCODE_DEL) {
                     if (event.getAction() == KeyEvent.ACTION_DOWN && !pressed) {
                         pressed = true;
@@ -143,9 +148,20 @@ public class ConnectionView extends AppCompatActivity {
         };
     }
 
+    private void setupButton() {
+        findViewById(R.id.button3).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent demonstrationViewIntent = new Intent(ConnectionView.this, DemonstrationView.class);
+                startActivity(demonstrationViewIntent);
+            }
+        });
+    }
+
     private void setupControlElements() {
         setupSpinner();
         setupIpAddressEditText();
+        setupButton();
         findViewById(R.id.fullscreen_content).setOnClickListener(getHideKeyboardClickListener());
     }
 
@@ -160,13 +176,12 @@ public class ConnectionView extends AppCompatActivity {
 
     boolean inChanged = false;
     int clearOffset = 0;
+
     private void smartClearAddress(EditText ipAddressField, String ipAddress) {
-        if (previousAddress.endsWith(".") && ipAddress.length() > 0)
-        {
+        if (previousAddress.endsWith(".") && ipAddress.length() > 0) {
             setTextWithSaveCursor(ipAddressField, ipAddress.substring(0, ipAddress.length() - 1), -1);
             clearOffset = 1;
-        }
-        else clearOffset = 0;
+        } else clearOffset = 0;
     }
 
     private void smartWriteAddress(EditText ipAddressField, String ipAddress) {
@@ -212,13 +227,13 @@ public class ConnectionView extends AppCompatActivity {
     public void onClick(View v) {
     }
 
-    private String getLocalIp(){
-        try{
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+    private String getLocalIp() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
                 NetworkInterface intf = en.nextElement();
                 if (intf.getName().contains("wlan")) {
                     for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
-                            .hasMoreElements();) {
+                            .hasMoreElements(); ) {
                         InetAddress inetAddress = enumIpAddr.nextElement();
                         if (!inetAddress.isLoopbackAddress()
                                 && (inetAddress.getAddress().length == 4)) {
@@ -227,7 +242,8 @@ public class ConnectionView extends AppCompatActivity {
                     }
                 }
             }
-        }catch(SocketException ignored){}
+        } catch (SocketException ignored) {
+        }
         return null;
     }
 
@@ -239,7 +255,8 @@ public class ConnectionView extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (finalMyIp == null) Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_connection),Toast.LENGTH_LONG).show();
+                        if (finalMyIp == null)
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_connection), Toast.LENGTH_LONG).show();
                         else {
                             EditText ipEditText = findViewById(R.id.editText4);
                             ipEditText.setText(finalMyIp.substring(0, finalMyIp.lastIndexOf(".") + 1));
