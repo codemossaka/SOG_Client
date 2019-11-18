@@ -1,5 +1,6 @@
 package com.slavaguk2000.sog_client;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Bitmap;
@@ -7,6 +8,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -14,32 +16,23 @@ import android.widget.TextView;
 
 import static java.lang.Thread.sleep;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
 public class DemonstrationView extends AppCompatActivity {
+    private final Handler mHideHandler = new Handler();
+    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    private static final int UI_ANIMATION_HIDE = 300;
+    private static final int UI_ANIMATION_SHOW = 100;
+
+    private boolean buttonHidden = false;
+
     private TextView mainTextView;
     private TextView titleView;
     private ImageView mainImageView;
     private Button disconnectButton;
-    int verce = 0;
-    String[] texts = {
-            "1. In the beginning God created the heavens and the earth.",
-            "2. Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit of God was hovering over the waters.",
-            "3. And God said, “Let there be light,” and there was light.",
-            "4. God saw that the light was good, and he separated the light from the darkness.",
-            "5. God called the light “day,” and the darkness he called “night.” And there was evening, and there was morning—the first day.",
-            "6. And God said, “Let there be a vault between the waters to separate water from water.”",
-            "7. So God made the vault and separated the water under the vault from the water above it. And it was so.",
-            "8. God called the vault “sky.” And there was evening, and there was morning—the second day.",
-            "9 And God said, “Let the water under the sky be gathered to one place, and let dry ground appear.” And it was so." ,
-            "10 God called the dry ground “land,” and the gathered waters he called “seas.” And God saw that it was good."
-    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_demonstration_view);
+        setContentView(R.layout.change_mode_curtain);
         mainTextView = findViewById(R.id.demonstrationTextView);
         titleView = findViewById(R.id.demonstrationTitleView);
         mainImageView = findViewById(R.id.imageView);
@@ -51,7 +44,16 @@ public class DemonstrationView extends AppCompatActivity {
         disconnectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                if (!buttonHidden) finish();
+                else setButtonVisible(true);
+            }
+        });
+        delayedHide();
+        mainImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setButtonVisible(true);
+                delayedHide();
             }
         });
     }
@@ -77,5 +79,22 @@ public class DemonstrationView extends AppCompatActivity {
                 mainImageView.setImageBitmap(finalImage);
             }
         });
+    }
+
+    private final Runnable hideButtonRunnable = new Runnable() {
+        @Override
+        public void run() {
+            setButtonVisible(false);
+        }
+    };
+
+    private void delayedHide() {
+        mHideHandler.removeCallbacks(hideButtonRunnable);
+        mHideHandler.postDelayed(hideButtonRunnable, AUTO_HIDE_DELAY_MILLIS);
+    }
+
+    private void setButtonVisible(boolean flag){
+        disconnectButton.animate().setDuration(flag?UI_ANIMATION_SHOW:UI_ANIMATION_HIDE).alpha(flag?1:0);
+        buttonHidden = !flag;
     }
 }
