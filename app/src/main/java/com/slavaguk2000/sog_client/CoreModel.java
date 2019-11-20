@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 final class CoreModel {
     private static CoreModel instance;
-    private DemonstrationViewModel contentDemostrator;
+    private DemonstrationViewModel contentDemonstrator;
 
     private CoreModel(int mode) {
         this.mode = mode;
@@ -49,24 +49,28 @@ final class CoreModel {
     }
 
     void setContentDemonstrator(DemonstrationViewModel demonstrator) {
-        contentDemostrator = demonstrator;
+        contentDemonstrator = demonstrator;
     }
 
     public void setImage(Bitmap image){
-        contentDemostrator.setImage(image);
+        contentDemonstrator.setImage(image);
     }
 
     public void setText(String text, String title){
-        contentDemostrator.setText(text, title);
+        contentDemonstrator.setText(text, title);
     }
-
+    private Transceiver transceiver;
     public void connect(ConnectionView parent, String ipAddress){
-        //Trans
-        Intent demonstrationViewIntent = new Intent(parent, DemonstrationView.class);
-        parent.startActivity(demonstrationViewIntent);
+         transceiver = new Transceiver(ipAddress, this);
+        this.parent = parent;
     }
     public void disconnect(){
-
+        transceiver.closeSocket();
         setContentDemonstrator(null);
+    }
+    private ConnectionView parent;
+    public void createDemonstrator() {
+        Intent demonstrationViewIntent = new Intent(parent, DemonstrationView.class);
+        parent.startActivity(demonstrationViewIntent);
     }
 }
