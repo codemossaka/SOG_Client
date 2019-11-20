@@ -126,8 +126,7 @@ public class ConnectionViewModel {
                     }
                 }
             }
-        } catch (SocketException ignored) {
-        }
+        } catch (SocketException ignored) { }
         return null;
     }
 

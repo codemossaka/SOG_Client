@@ -20,7 +20,6 @@ import android.widget.Toast;
 import static android.text.InputType.TYPE_CLASS_NUMBER;
 
 public class ConnectionView extends AppCompatActivity {
-    private static final int HOLD_TIME = 50;
 
     private Spinner modeSpinner;
     private EditText ipAddressText;
@@ -32,12 +31,12 @@ public class ConnectionView extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
-        viewModel = new ConnectionViewModel(this);
         initControlElements();
         setupControlElements();
     }
 
     private void initControlElements() {
+        viewModel = new ConnectionViewModel(this);
         modeSpinner = findViewById(R.id.spinner);
         connectButton = findViewById(R.id.button3);
         ipAddressText = findViewById(R.id.editText4);
