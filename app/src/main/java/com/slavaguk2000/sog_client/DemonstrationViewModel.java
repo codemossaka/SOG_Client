@@ -5,28 +5,41 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 
-public class DemonstrationViewModel {
+import com.slavaguk2000.sog_client.ChangeMode.ChangeModeEvent;
+import com.slavaguk2000.sog_client.ChangeMode.ChangeModeListener;
+
+public class DemonstrationViewModel implements ChangeModeListener {
     private final Handler mHideHandler = new Handler();
 
-
+    private CoreModel core;
     private DemonstrationView parent;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private boolean buttonHidden = false;
 
-    public DemonstrationViewModel(DemonstrationView parent) {
+    DemonstrationViewModel(DemonstrationView parent) {
         this.parent = parent;
+        core = CoreModel.getInstance(parent.getMode());
+        selectMode(core.getMode());
+        core.addChangeModeListener(this);
+        core.setContentDemonstrator(this);
     }
 
-    public void onStart() {
+
+    private void selectMode(int mode) {
+        int myMode = parent.getMode();
+        if (myMode != mode) parent.setMode(mode);
+    }
+
+    void onStart() {
         delayedHide();
     }
 
-    public void onCloseButtonClick() {
+    void onCloseButtonClick() {
         if (!buttonHidden) parent.finish();
         else setButtonVisible(true);
     }
 
-    public void onMainFieldClick() {
+    void onMainFieldClick() {
         setButtonVisible(true);
         delayedHide();
     }
@@ -41,7 +54,8 @@ public class DemonstrationViewModel {
         if (!textString.isEmpty() || !titleString.isEmpty()) setImage(null);
         parent.setText(textString, titleString);
     }
-    public void setImage(Bitmap image){
+
+    public void setImage(Bitmap image) {
         if (image == null) image = getBlack();
         else setText("", "");
         final Bitmap finalImage = Bitmap.createBitmap(image);
@@ -52,6 +66,7 @@ public class DemonstrationViewModel {
             }
         });
     }
+
     private final Runnable hideButtonRunnable = new Runnable() {
         @Override
         public void run() {
@@ -64,8 +79,22 @@ public class DemonstrationViewModel {
         mHideHandler.postDelayed(hideButtonRunnable, AUTO_HIDE_DELAY_MILLIS);
     }
 
-    private void setButtonVisible(boolean flag){
+    private void setButtonVisible(boolean flag) {
         parent.setButtonVisible(flag);
         buttonHidden = !flag;
+    }
+
+    void setMode(int position) {
+        core.setMode(position);
+    }
+
+    @Override
+    public void onChangeMode(ChangeModeEvent event) {
+        selectMode(event.getMode());
+    }
+
+    void disconnect() {
+        core.removeChangeModeListener(this);
+        core.disconnect();
     }
 }

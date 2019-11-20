@@ -7,44 +7,48 @@ import android.os.AsyncTask;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.slavaguk2000.sog_client.ChangeMode.ChangeModeEvent;
+import com.slavaguk2000.sog_client.ChangeMode.ChangeModeListener;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
-public class ConnectionViewModel {
+public class ConnectionViewModel implements ChangeModeListener {
 
     private ConnectionView parent;
     private String previousAddress;
     private int previousPosition;
+    private CoreModel core;
+    private int mode;
 
-    public ConnectionViewModel(ConnectionView parent) {
+    ConnectionViewModel(ConnectionView parent) {
         this.parent = parent;
+        core = CoreModel.getInstance(parent.getMode());
+        core.addChangeModeListener(this);
     }
 
-    public void onStart() {
-        setLocalIp();
-    }
-
-    public void spinnerTouched(View v) {
+    void spinnerTouched(View v) {
         hideKeyboard(v);
     }
 
-    public void setMode(int position) {
-
+    void setMode(int position) {
+        mode = position;
+        core.setMode(position);
     }
 
-    public void savePreviousTextFieldInstance() {
+    void savePreviousTextFieldInstance() {
         this.previousAddress = parent.getIpAddress();
         this.previousPosition = parent.getCursorPosition();
     }
 
-    public void processIpAddressChanging() {
+    void processIpAddressChanging() {
         if (!inChanged) editIpAddressField();
     }
 
-    boolean inChanged = false;
-    int clearOffset = 0;
+    private boolean inChanged = false;
+    private int clearOffset = 0;
 
     private void smartClearAddress(String ipAddress) {
         if (previousAddress.endsWith(".") && ipAddress.length() > 0) {
@@ -99,16 +103,15 @@ public class ConnectionViewModel {
         }
     }
 
-    public void clickMainContent(View v) {
+    void clickMainContent(View v) {
         hideKeyboard(v);
     }
 
-    public void onConnectButtonClick() {
-        Intent demonstrationViewIntent = new Intent(parent, DemonstrationView.class);
-        parent.startActivity(demonstrationViewIntent);
+    void onConnectButtonClick() {
+        core.connect(parent, parent.getIpAddress());
     }
 
-    public void onResume() {
+    void onResume() {
         if (parent.getIpAddress().isEmpty()) setLocalIp();
     }
 
@@ -130,7 +133,7 @@ public class ConnectionViewModel {
         return null;
     }
 
-    public void setLocalIp() {
+    private void setLocalIp() {
         @SuppressLint("StaticFieldLeak") final AsyncTask<Void, Void, Void> getLocalIp = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -151,5 +154,13 @@ public class ConnectionViewModel {
             }
         };
         getLocalIp.execute();
+    }
+    private void selectMode(int mode) {
+        if (this.mode != mode) parent.setMode(mode);
+    }
+
+    @Override
+    public void onChangeMode(ChangeModeEvent event) {
+        selectMode(event.getMode());
     }
 }

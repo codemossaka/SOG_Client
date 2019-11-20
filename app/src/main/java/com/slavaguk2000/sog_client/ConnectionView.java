@@ -19,7 +19,7 @@ import android.widget.Toast;
 
 import static android.text.InputType.TYPE_CLASS_NUMBER;
 
-public class ConnectionView extends AppCompatActivity {
+public class ConnectionView extends AppCompatActivity{
 
     private Spinner modeSpinner;
     private EditText ipAddressText;
@@ -36,11 +36,11 @@ public class ConnectionView extends AppCompatActivity {
     }
 
     private void initControlElements() {
-        viewModel = new ConnectionViewModel(this);
-        modeSpinner = findViewById(R.id.spinner);
+        modeSpinner = findViewById(R.id.connectedSpinner);
         connectButton = findViewById(R.id.button3);
         ipAddressText = findViewById(R.id.editText4);
         mainContent = findViewById(R.id.fullscreen_content);
+        viewModel = new ConnectionViewModel(this);
     }
 
     private AdapterView.OnItemSelectedListener getOnItemSelectedSpinnerListener() {
@@ -158,5 +158,12 @@ public class ConnectionView extends AppCompatActivity {
 
     public void createErrorConnectionToast(){
         Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_connection), Toast.LENGTH_LONG).show();
+    }
+
+    public void setMode(int selection){
+        modeSpinner.setSelection(selection);
+    }
+    public int getMode(){
+        return modeSpinner.getSelectedItemPosition();
     }
 }
