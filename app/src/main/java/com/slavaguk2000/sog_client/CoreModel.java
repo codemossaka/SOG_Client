@@ -1,10 +1,12 @@
 package com.slavaguk2000.sog_client;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.widget.Toast;
 
-import com.slavaguk2000.sog_client.ChangeMode.ChangeModeEvent;
-import com.slavaguk2000.sog_client.ChangeMode.ChangeModeListener;
+import com.slavaguk2000.sog_client.Events.ChangeModeEvent;
+import com.slavaguk2000.sog_client.Events.ModelEventListener;
 
 import java.util.ArrayList;
 
@@ -25,13 +27,13 @@ final class CoreModel {
 
     private int mode = 0;
 
-    private ArrayList<ChangeModeListener> changeModeListeners = new ArrayList<>();
+    private ArrayList<ModelEventListener> changeModeListeners = new ArrayList<>();
 
-    void addChangeModeListener(ChangeModeListener listener) {
+    void addChangeModeListener(ModelEventListener listener) {
         changeModeListeners.add(listener);
     }
 
-    void removeChangeModeListener(ChangeModeListener listener) {
+    void removeChangeModeListener(ModelEventListener listener) {
         changeModeListeners.remove(listener);
     }
 
@@ -43,8 +45,8 @@ final class CoreModel {
         if (this.mode == mode) return;
         this.mode = mode;
         ///Transiver...
-        for (ChangeModeListener listener : changeModeListeners) {
-            listener.onChangeMode(new ChangeModeEvent(this, this.mode));
+        for (ModelEventListener listener : changeModeListeners) {
+            listener.onModelEvent(new ChangeModeEvent(this, this.mode));
         }
     }
 
@@ -53,24 +55,38 @@ final class CoreModel {
     }
 
     public void setImage(Bitmap image){
+        if (contentDemonstrator == null) return;
         contentDemonstrator.setImage(image);
     }
 
     public void setText(String text, String title){
+        if (contentDemonstrator == null) return;
         contentDemonstrator.setText(text, title);
     }
     private Transceiver transceiver;
     public void connect(ConnectionView parent, String ipAddress){
+        if (transceiver != null) return;
          transceiver = new Transceiver(ipAddress, this);
         this.parent = parent;
     }
     public void disconnect(){
         transceiver.closeSocket();
         setContentDemonstrator(null);
+        transceiver = null;
     }
     private ConnectionView parent;
     public void createDemonstrator() {
         Intent demonstrationViewIntent = new Intent(parent, DemonstrationView.class);
         parent.startActivity(demonstrationViewIntent);
+    }
+
+    public void createToast(String message) {
+        if (contentDemonstrator == null) return;
+        contentDemonstrator.createToast(message);
+    }
+
+    public void createToastFromResourceString(int id) {
+        if (contentDemonstrator == null) return;
+        contentDemonstrator.createToastFromResourceString(id);
     }
 }

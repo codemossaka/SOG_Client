@@ -15,4 +15,5 @@
     </string-array>
 
     <string name="title_activity_demonstration_view">DemonstrationView</string>
+    <string name="conectionLost">Connection lost</string>
 </resources>

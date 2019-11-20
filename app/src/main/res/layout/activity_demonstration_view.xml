@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0099cc"
+    android:background="#000000"
     tools:context=".DemonstrationView">
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:srcCompat="@android:color/black"/>
+        app:srcCompat="@android:color/black" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -25,9 +25,8 @@
             android:layout_alignParentTop="true"
             android:layout_marginTop="0dp"
             android:layout_marginBottom="0dp"
-            android:text="@string/text"
-            android:textAlignment="center"
             android:gravity="center_vertical|center_horizontal"
+            android:textAlignment="center"
             android:textColor="@color/white"
             app:autoSizeMaxTextSize="100sp"
             app:autoSizeMinTextSize="10sp"
@@ -39,9 +38,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:text="@string/title"
-            android:textColor="@color/white"
             android:textAlignment="center"
+            android:textColor="@color/white"
             android:textSize="20sp" />
 
         <Button

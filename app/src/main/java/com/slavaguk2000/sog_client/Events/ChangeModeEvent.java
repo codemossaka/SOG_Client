@@ -1,4 +1,4 @@
-package com.slavaguk2000.sog_client.ChangeMode;
+package com.slavaguk2000.sog_client.Events;
 
 import java.util.EventObject;
 

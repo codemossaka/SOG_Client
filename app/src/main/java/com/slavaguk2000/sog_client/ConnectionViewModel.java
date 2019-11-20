@@ -2,20 +2,22 @@ package com.slavaguk2000.sog_client;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
+import android.util.EventLog;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
-import com.slavaguk2000.sog_client.ChangeMode.ChangeModeEvent;
-import com.slavaguk2000.sog_client.ChangeMode.ChangeModeListener;
+import com.slavaguk2000.sog_client.Events.ChangeModeEvent;
+import com.slavaguk2000.sog_client.Events.ModelEventListener;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.EventObject;
 
-public class ConnectionViewModel implements ChangeModeListener {
+public class ConnectionViewModel implements ModelEventListener {
 
     private ConnectionView parent;
     private String previousAddress;
@@ -160,7 +162,7 @@ public class ConnectionViewModel implements ChangeModeListener {
     }
 
     @Override
-    public void onChangeMode(ChangeModeEvent event) {
-        selectMode(event.getMode());
+    public void onModelEvent(EventObject event) {
+        if (event.getClass() == ChangeModeEvent.class) selectMode(((ChangeModeEvent)event).getMode());
     }
 }

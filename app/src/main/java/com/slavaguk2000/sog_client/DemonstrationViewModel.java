@@ -1,14 +1,18 @@
 package com.slavaguk2000.sog_client;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Toast;
 
-import com.slavaguk2000.sog_client.ChangeMode.ChangeModeEvent;
-import com.slavaguk2000.sog_client.ChangeMode.ChangeModeListener;
+import com.slavaguk2000.sog_client.Events.ChangeModeEvent;
+import com.slavaguk2000.sog_client.Events.ModelEventListener;
 
-public class DemonstrationViewModel implements ChangeModeListener {
+import java.util.EventObject;
+
+public class DemonstrationViewModel implements ModelEventListener {
     private final Handler mHideHandler = new Handler();
 
     private CoreModel core;
@@ -50,17 +54,28 @@ public class DemonstrationViewModel implements ChangeModeListener {
         return blackBitmap;
     }
 
+    public void runOnMainLooper(Runnable task){
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(task);
+        }
+
     public void setText(String textString, String titleString) {
+        final String finalTextString = textString;
+        final String finalTitleString = titleString;
         if (!textString.isEmpty() || !titleString.isEmpty()) setImage(null);
-        parent.setText(textString, titleString);
+        runOnMainLooper(new Runnable() {
+            @Override
+            public void run() {
+                parent.setText(finalTextString, finalTitleString);
+            }
+        });
     }
 
     public void setImage(Bitmap image) {
         if (image == null) image = getBlack();
         else setText("", "");
         final Bitmap finalImage = Bitmap.createBitmap(image);
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
+        runOnMainLooper(new Runnable() {
             public void run() {
                 parent.setImage(finalImage);
             }
@@ -89,12 +104,26 @@ public class DemonstrationViewModel implements ChangeModeListener {
     }
 
     @Override
-    public void onChangeMode(ChangeModeEvent event) {
-        selectMode(event.getMode());
+    public void onModelEvent(EventObject event) {
+        if(event.getClass() == ChangeModeEvent.class)selectMode(((ChangeModeEvent)event).getMode());
     }
 
     void disconnect() {
         core.removeChangeModeListener(this);
         core.disconnect();
+    }
+
+    public void createToast(String message) {
+        final String finalMessage = message;
+        runOnMainLooper(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(parent,finalMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void createToastFromResourceString(int id) {
+        createToast(parent.getString(id));
     }
 }
