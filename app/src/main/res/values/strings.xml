@@ -15,5 +15,7 @@
     </string-array>
 
     <string name="title_activity_demonstration_view">DemonstrationView</string>
-    <string name="conectionLost">Connection lost</string>
+    <string name="connectionLost">Connection lost</string>
+    <string name="connectionRestored">Conection Restored</string>
+    <string name="serverNotFounded">Server not founded</string>
 </resources>
