@@ -14,7 +14,7 @@ public class Transceiver extends Thread {
     private final int retryCount = 10;
     private boolean work = true;
     private final CoreModel core;
-    private Socket mainSocket;
+    private Socket socket;
     private String ipAddress;
     private boolean isChords;
     private DataInputStream reader;
@@ -29,7 +29,7 @@ public class Transceiver extends Thread {
     }
 
     private void connect() throws IOException {
-        mainSocket = new Socket(ipAddress, port);
+        socket = new Socket(ipAddress, port);
     }
 
     public void run() {
@@ -51,8 +51,8 @@ public class Transceiver extends Thread {
     }
 
     private void networkCommunication() throws IOException {
-        reader = new DataInputStream(mainSocket.getInputStream());
-        writer = new DataOutputStream(mainSocket.getOutputStream());
+        reader = new DataInputStream(socket.getInputStream());
+        writer = new DataOutputStream(socket.getOutputStream());
         sendCommandData();
         while (work) {
             if (reader.readInt() == 0) getImage();
@@ -124,7 +124,7 @@ public class Transceiver extends Thread {
     void disconnect() {
         work = false;
         try {
-            mainSocket.close();
+            socket.close();
         } catch (Exception ignored) {
         }
     }
