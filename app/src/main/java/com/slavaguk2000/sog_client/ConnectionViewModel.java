@@ -104,7 +104,7 @@ public class ConnectionViewModel implements ModelEventListener {
         hideKeyboard(v);
     }
 
-    void onConnectButtonClick() {
+    void connect() {
         core.connect(parent, parent.getIpAddress());
     }
     void onPause(){

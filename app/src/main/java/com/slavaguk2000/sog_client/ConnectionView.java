@@ -112,7 +112,7 @@ public class ConnectionView extends AppCompatActivity{
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                viewModel.onConnectButtonClick();
+                viewModel.connect();
             }
         });
     }
