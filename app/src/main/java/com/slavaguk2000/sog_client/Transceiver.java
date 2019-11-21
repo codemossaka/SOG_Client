@@ -11,17 +11,14 @@ public class Transceiver extends Thread {
     private final int port = 8536;
     private final int changeModeCommandCode = 100;
     private final int commandLength = 2;
-    private int retryCount = 0;
-    private static final int maxRetryCount = 10;
+    private final int retryCount = 10;
     private boolean work = true;
     private final CoreModel core;
     private Socket mainSocket;
     private String ipAddress;
-    private Thread receivingThread;
-    boolean isChords;
-
-    DataInputStream reader;
-    DataOutputStream writer;
+    private boolean isChords;
+    private DataInputStream reader;
+    private DataOutputStream writer;
 
     Transceiver(String ipAddress, CoreModel core, boolean isChords) {
         super();
@@ -49,7 +46,7 @@ public class Transceiver extends Thread {
         try {
             networkCommunication();
         } catch (IOException e) {
-            retry();
+            retry(retryCount);
         }
     }
 
@@ -57,8 +54,8 @@ public class Transceiver extends Thread {
         reader = new DataInputStream(mainSocket.getInputStream());
         writer = new DataOutputStream(mainSocket.getOutputStream());
         sendCommandData();
-        while(work){
-            if(reader.readInt() == 0) getImage();
+        while (work) {
+            if (reader.readInt() == 0) getImage();
             else getText();
         }
     }
@@ -69,9 +66,9 @@ public class Transceiver extends Thread {
         reader.read(data, 0, length);
         return new String(data, "UTF-8");
     }
+
     private void getText() throws IOException {
-        String text = getUtfString(),
-                title = getUtfString();
+        String text = getUtfString(), title = getUtfString();
         core.setText(text, title);
     }
 
@@ -85,40 +82,37 @@ public class Transceiver extends Thread {
                 input[i / 4] = reader.readUnsignedByte();
             setImage(Decoder.decodeImage(height, width, input));
         } else core.setText(" ", "");
-        //if (width == -1) work = false;//for compatibility
     }
 
-    private void retry() {
+    private void retry(int times) {
         core.createToastFromResourceString(R.string.connectionLost);
-        while (retryCount++ < maxRetryCount && work) {
-            try {
-                connect();
-                sendCommandData();
-                core.createToastFromResourceString(R.string.connectionRestored);
-                retryCount = 0;
-                supportConnection();
-                return;
-            } catch (IOException ignored) {
-            }
+        try {
+            connect();
+            sendCommandData();
+            core.createToastFromResourceString(R.string.connectionRestored);
+            supportConnection();
+        } catch (IOException ignored) {
+            if (times > 0 ) retry(times - 1);
+            else core.createToastFromResourceString(R.string.serverNotFounded);
         }
-        core.createToastFromResourceString(R.string.serverNotFounded);
     }
 
     private void sendCommandData() throws IOException {
         byte[] command = new byte[commandLength];
         command[0] = changeModeCommandCode;
-        command[1] = (byte)(isChords?1:0);
+        command[1] = (byte) (isChords ? 1 : 0);
         writer.write(command);
     }
-    void sendCommand(final boolean isChords){
-        if(this.isChords == isChords) return;
+
+    void sendCommand(final boolean isChords) {
+        if (this.isChords == isChords) return;
         this.isChords = isChords;
         Thread sendCommandThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
                     sendCommandData();
-                }catch (IOException ignored){
+                } catch (IOException ignored) {
                     retry();
                 }
             }
