@@ -3,14 +3,10 @@ package com.slavaguk2000.sog_client;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.EventLog;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
-
 import com.slavaguk2000.sog_client.Events.ChangeModeEvent;
 import com.slavaguk2000.sog_client.Events.ModelEventListener;
-
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -24,6 +20,7 @@ public class ConnectionViewModel implements ModelEventListener {
     private int previousPosition;
     private CoreModel core;
     private int mode;
+    private boolean activityPaused = false;
 
     ConnectionViewModel(ConnectionView parent) {
         this.parent = parent;
@@ -50,13 +47,11 @@ public class ConnectionViewModel implements ModelEventListener {
     }
 
     private boolean inChanged = false;
-    private int clearOffset = 0;
 
     private void smartClearAddress(String ipAddress) {
-        if (previousAddress.endsWith(".") && ipAddress.length() > 0) {
+
+        if (previousAddress.endsWith(".") && ipAddress.length() > 0)
             setTextWithSaveCursor(ipAddress.substring(0, ipAddress.length() - 1), -1);
-            clearOffset = 1;
-        } else clearOffset = 0;
     }
 
     private void smartWriteAddress(String ipAddress) {
@@ -112,9 +107,13 @@ public class ConnectionViewModel implements ModelEventListener {
     void onConnectButtonClick() {
         core.connect(parent, parent.getIpAddress());
     }
-
+    void onPause(){
+        activityPaused = true;
+    }
     void onResume() {
         if (parent.getIpAddress().isEmpty()) setLocalIp();
+        activityPaused = false;
+        if(parent.getMode()!= mode) parent.setMode(mode);
     }
 
     private String getLocalIp() {
@@ -136,7 +135,8 @@ public class ConnectionViewModel implements ModelEventListener {
     }
 
     private void setLocalIp() {
-        @SuppressLint("StaticFieldLeak") final AsyncTask<Void, Void, Void> getLocalIp = new AsyncTask<Void, Void, Void>() {
+        @SuppressLint("StaticFieldLeak")
+        final AsyncTask<Void, Void, Void> getLocalIp = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 final String finalIP = getLocalIp();
@@ -158,7 +158,10 @@ public class ConnectionViewModel implements ModelEventListener {
         getLocalIp.execute();
     }
     private void selectMode(int mode) {
-        if (this.mode != mode) parent.setMode(mode);
+        if (this.mode != mode) {
+            this.mode = mode;
+            if(!activityPaused) parent.setMode(mode);
+        }
     }
 
     @Override

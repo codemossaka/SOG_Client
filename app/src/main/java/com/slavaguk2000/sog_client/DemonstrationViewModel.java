@@ -1,6 +1,5 @@
 package com.slavaguk2000.sog_client;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Handler;
@@ -54,12 +53,12 @@ public class DemonstrationViewModel implements ModelEventListener {
         return blackBitmap;
     }
 
-    public void runOnMainLooper(Runnable task){
+    private void runOnMainLooper(Runnable task){
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(task);
         }
 
-    public void setText(String textString, String titleString) {
+    void setText(String textString, String titleString) {
         final String finalTextString = textString;
         final String finalTitleString = titleString;
         if (!textString.isEmpty() || !titleString.isEmpty()) setImage(null);
@@ -71,7 +70,7 @@ public class DemonstrationViewModel implements ModelEventListener {
         });
     }
 
-    public void setImage(Bitmap image) {
+    void setImage(Bitmap image) {
         if (image == null) image = getBlack();
         else setText("", "");
         final Bitmap finalImage = Bitmap.createBitmap(image);
@@ -113,7 +112,7 @@ public class DemonstrationViewModel implements ModelEventListener {
         core.disconnect();
     }
 
-    public void createToast(String message) {
+    void createToast(String message) {
         final String finalMessage = message;
         runOnMainLooper(new Runnable() {
             @Override
@@ -123,7 +122,7 @@ public class DemonstrationViewModel implements ModelEventListener {
         });
     }
 
-    public void createToastFromResourceString(int id) {
+    void createToastFromResourceString(int id) {
         createToast(parent.getString(id));
     }
 }

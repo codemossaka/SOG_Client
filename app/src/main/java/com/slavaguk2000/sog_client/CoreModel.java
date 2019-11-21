@@ -1,9 +1,7 @@
 package com.slavaguk2000.sog_client;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.widget.Toast;
 
 import com.slavaguk2000.sog_client.Events.ChangeModeEvent;
 import com.slavaguk2000.sog_client.Events.ModelEventListener;
@@ -44,48 +42,48 @@ final class CoreModel {
     void setMode(int mode) {
         if (this.mode == mode) return;
         this.mode = mode;
-        ///Transiver...
-        for (ModelEventListener listener : changeModeListeners) {
-            listener.onModelEvent(new ChangeModeEvent(this, this.mode));
-        }
+        if (transceiver != null) transceiver.sendCommand(mode==0);
+            for (ModelEventListener listener : changeModeListeners) {
+                listener.onModelEvent(new ChangeModeEvent(this, this.mode));
+            }
     }
 
     void setContentDemonstrator(DemonstrationViewModel demonstrator) {
         contentDemonstrator = demonstrator;
     }
 
-    public void setImage(Bitmap image){
+    void setImage(Bitmap image) {
         if (contentDemonstrator == null) return;
         contentDemonstrator.setImage(image);
     }
 
-    public void setText(String text, String title){
+    void setText(String text, String title) {
         if (contentDemonstrator == null) return;
         contentDemonstrator.setText(text, title);
     }
+
     private Transceiver transceiver;
-    public void connect(ConnectionView parent, String ipAddress){
+
+    void connect(ConnectionView parent, String ipAddress) {
         if (transceiver != null) return;
-         transceiver = new Transceiver(ipAddress, this);
+        transceiver = new Transceiver(ipAddress, this, parent.getMode() == 0);
         this.parent = parent;
     }
-    public void disconnect(){
-        transceiver.closeSocket();
+
+    void disconnect() {
+        transceiver.disconnect();
         setContentDemonstrator(null);
         transceiver = null;
     }
+
     private ConnectionView parent;
-    public void createDemonstrator() {
+
+    void createDemonstrator() {
         Intent demonstrationViewIntent = new Intent(parent, DemonstrationView.class);
         parent.startActivity(demonstrationViewIntent);
     }
 
-    public void createToast(String message) {
-        if (contentDemonstrator == null) return;
-        contentDemonstrator.createToast(message);
-    }
-
-    public void createToastFromResourceString(int id) {
+    void createToastFromResourceString(int id) {
         if (contentDemonstrator == null) return;
         contentDemonstrator.createToastFromResourceString(id);
     }

@@ -147,6 +147,12 @@ public class ConnectionView extends AppCompatActivity{
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        viewModel.onPause();
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
     }
