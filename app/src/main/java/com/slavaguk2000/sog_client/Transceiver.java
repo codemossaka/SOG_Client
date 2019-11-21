@@ -113,7 +113,7 @@ public class Transceiver extends Thread {
                 try {
                     sendCommandData();
                 } catch (IOException ignored) {
-                    retry();
+                    retry(retryCount);
                 }
             }
         });

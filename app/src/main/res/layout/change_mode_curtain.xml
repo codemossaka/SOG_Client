@@ -29,9 +29,9 @@
             <Spinner
                 android:id="@+id/curtainSpinner"
                 style="@style/Platform.Widget.AppCompat.Spinner"
-                android:layout_width="69dp"
-                android:layout_height="33dp"
-                android:background="@color/elements"
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:background="@drawable/edit_text"
                 android:entries="@array/type_of_information"
                 android:gravity="center"
                 android:popupBackground="@color/dark_orange"

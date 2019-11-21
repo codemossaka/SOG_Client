@@ -19,7 +19,6 @@
         <activity
             android:name=".DemonstrationView"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_demonstration_view"
             android:theme="@style/FullscreenTheme" />
         <activity
             android:name=".ConnectionView"

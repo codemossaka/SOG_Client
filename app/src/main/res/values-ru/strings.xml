@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">SOG-Клиент</string>
+    <string name="connectButton">Подключиться</string>
+    <string name="ip_address"> IP-Адрес</string>
+    <string name="error_connection">Проверьте соединение</string>
+     <string-array name="type_of_information">
+        <item>Аккорды</item>
+        <item>Текст</item>
+    </string-array>
+
+    <string name="connectionLost">Соединение потеряно</string>
+    <string name="connectionRestored">Соединение восстановлено</string>
+    <string name="serverNotFounded">Сервер не найден</string>
+</resources>
