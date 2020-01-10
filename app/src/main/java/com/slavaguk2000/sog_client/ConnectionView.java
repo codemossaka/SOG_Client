@@ -153,11 +153,6 @@ public class ConnectionView extends AppCompatActivity{
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
