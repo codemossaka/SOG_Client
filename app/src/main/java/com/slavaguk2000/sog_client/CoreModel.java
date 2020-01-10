@@ -11,6 +11,10 @@ import java.util.ArrayList;
 final class CoreModel {
     private static CoreModel instance;
     private DemonstrationViewModel contentDemonstrator;
+    private ConnectionView parent;
+    private Transceiver transceiver;
+    private int mode = 0;
+    private ArrayList<ModelEventListener> changeModeListeners = new ArrayList<>();
 
     private CoreModel(int mode) {
         this.mode = mode;
@@ -22,10 +26,6 @@ final class CoreModel {
         }
         return instance;
     }
-
-    private int mode = 0;
-
-    private ArrayList<ModelEventListener> changeModeListeners = new ArrayList<>();
 
     void addChangeModeListener(ModelEventListener listener) {
         changeModeListeners.add(listener);
@@ -62,8 +62,6 @@ final class CoreModel {
         contentDemonstrator.setText(text, title);
     }
 
-    private Transceiver transceiver;
-
     void connect(ConnectionView parent, String ipAddress) {
         if (transceiver != null) return;
         transceiver = new Transceiver(ipAddress, this, parent.getMode() == 0);
@@ -75,8 +73,6 @@ final class CoreModel {
         setContentDemonstrator(null);
         transceiver = null;
     }
-
-    private ConnectionView parent;
 
     void createDemonstrator() {
         Intent demonstrationViewIntent = new Intent(parent, DemonstrationView.class);
